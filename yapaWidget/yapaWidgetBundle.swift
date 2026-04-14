@@ -1,10 +1,3 @@
-//
-//  yapaWidgetBundle.swift
-//  yapaWidget
-//
-//  Created by David Umoru on 14/04/2026.
-//
-
 import WidgetKit
 import SwiftUI
 
@@ -12,7 +5,5 @@ import SwiftUI
 struct yapaWidgetBundle: WidgetBundle {
     var body: some Widget {
         yapaWidget()
-        yapaWidgetControl()
-        yapaWidgetLiveActivity()
     }
 }

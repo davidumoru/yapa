@@ -1,18 +1,8 @@
-//
-//  AppIntent.swift
-//  yapaWidget
-//
-//  Created by David Umoru on 14/04/2026.
-//
-
 import WidgetKit
 import AppIntents
 
+// Placeholder — not used by the habit widget (uses StaticConfiguration)
 struct ConfigurationAppIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource { "Configuration" }
-    static var description: IntentDescription { "This is an example widget." }
-
-    // An example configurable parameter.
-    @Parameter(title: "Favorite Emoji", default: "😃")
-    var favoriteEmoji: String
+    static var description: IntentDescription { "Yapa widget configuration." }
 }
