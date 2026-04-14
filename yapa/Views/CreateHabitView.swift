@@ -342,7 +342,7 @@ struct CreateHabitView: View {
             }
         }
 
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        AppSettings.shared.haptic(.medium)
         dismiss()
     }
 }

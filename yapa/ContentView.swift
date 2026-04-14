@@ -10,6 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @State private var selectedTab = 0
+    private var settings = AppSettings.shared
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -24,8 +25,15 @@ struct ContentView: View {
                     Label("Habits", systemImage: "square.grid.2x2.fill")
                 }
                 .tag(1)
+
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape.fill")
+                }
+                .tag(2)
         }
         .tint(Color(hex: "34C759"))
+        .preferredColorScheme(settings.theme.colorScheme)
     }
 }
 

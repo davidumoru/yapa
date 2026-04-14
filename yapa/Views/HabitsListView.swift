@@ -192,7 +192,7 @@ struct ReorderHabitsView: View {
 
     private func moveHabit(from source: IndexSet, to destination: Int) {
         orderedHabits.move(fromOffsets: source, toOffset: destination)
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        AppSettings.shared.haptic(.light)
     }
 
     private func saveOrder() {

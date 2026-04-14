@@ -1,5 +1,4 @@
 import SwiftUI
-import SwiftData
 
 struct HabitCard: View {
     let habit: Habit
@@ -47,9 +46,9 @@ struct HabitCard: View {
                     onToggle()
                 }
                 if wasCompleted {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    AppSettings.shared.haptic(.light)
                 } else {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    AppSettings.shared.notificationHaptic(.success)
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                     animateCheck = false

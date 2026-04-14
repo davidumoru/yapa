@@ -89,7 +89,7 @@ struct TodayView: View {
                 let total = todayHabits.count
                 if total > 0 && newValue == total && oldValue < total {
                     showConfetti = true
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    AppSettings.shared.notificationHaptic(.success)
                 }
             }
         }

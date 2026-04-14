@@ -234,9 +234,9 @@ struct HabitDetailView: View {
         try? modelContext.save()
 
         if wasCompleted {
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            AppSettings.shared.haptic(.light)
         } else {
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            AppSettings.shared.notificationHaptic(.success)
         }
     }
 
@@ -253,7 +253,7 @@ struct HabitDetailView: View {
             }
         }
 
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        AppSettings.shared.haptic(.medium)
         dismiss()
     }
 
@@ -261,7 +261,7 @@ struct HabitDetailView: View {
         NotificationManager.shared.removeReminders(for: habit)
         modelContext.delete(habit)
         try? modelContext.save()
-        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        AppSettings.shared.notificationHaptic(.warning)
         dismiss()
     }
 }
