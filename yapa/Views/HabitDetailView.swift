@@ -16,6 +16,7 @@ struct HabitDetailView: View {
             VStack(spacing: 24) {
                 headerSection
                 statsSection
+                milestonesSection
                 heatmapSection
                 recentActivitySection
             }
@@ -96,6 +97,19 @@ struct HabitDetailView: View {
                         .font(.system(.subheadline, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
+                if habit.graceDays > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "shield.fill")
+                            .font(.caption2)
+                        Text("\(habit.graceDays)-day grace")
+                    }
+                    .font(.system(.caption, design: .rounded, weight: .medium))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.blue.opacity(0.12))
+                    .foregroundStyle(.blue)
+                    .clipShape(Capsule())
+                }
             }
 
             Button {
@@ -143,6 +157,10 @@ struct HabitDetailView: View {
                 color: accentColor
             )
         }
+    }
+
+    private var milestonesSection: some View {
+        MilestonesView(habit: habit)
     }
 
     private var heatmapSection: some View {

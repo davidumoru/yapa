@@ -16,6 +16,8 @@ final class Habit {
     var createdAt: Date = Date()
     var isArchived: Bool = false
     var sortOrder: Int = 0
+    /// How many consecutive scheduled days can be missed without breaking a streak (0-2)
+    var graceDays: Int = 0
 
     @Relationship(deleteRule: .cascade, inverse: \HabitEntry.habit)
     var entries: [HabitEntry] = []
@@ -26,7 +28,8 @@ final class Habit {
         colorHex: String = "34C759",
         scheduledWeekdays: [Int] = [],
         targetDays: Int = 0,
-        reminderMinutes: [Int] = []
+        reminderMinutes: [Int] = [],
+        graceDays: Int = 0
     ) {
         self.id = UUID()
         self.name = name
@@ -35,6 +38,7 @@ final class Habit {
         self.scheduledWeekdays = scheduledWeekdays
         self.targetDays = targetDays
         self.reminderMinutes = reminderMinutes
+        self.graceDays = graceDays
         self.createdAt = Date()
         self.isArchived = false
         self.entries = []
@@ -58,29 +62,37 @@ final class Habit {
 
     var isCompletedToday: Bool { isCompletedOn(Date()) }
 
-    // MARK: - Streak calculation
+    private var completedDaySet: Set<Date> {
+        Set(entries.map { Calendar.current.startOfDay(for: $0.date) })
+    }
+
+    // MARK: - Streak calculation (grace-day aware)
 
     var currentStreak: Int {
-        let calendar = Calendar.current
-        let completedDays = Set(entries.map { calendar.startOfDay(for: $0.date) })
-        guard !completedDays.isEmpty else { return 0 }
+        let completed = completedDaySet
+        guard !completed.isEmpty else { return 0 }
 
+        let calendar = Calendar.current
         var checkDate = calendar.startOfDay(for: Date())
 
-        // Allow streak to continue if today isn't done yet — check from yesterday
-        if !completedDays.contains(checkDate) {
+        if !completed.contains(checkDate) {
             checkDate = checkDate.adding(days: -1)
         }
 
         var streak = 0
+        var consecutiveMisses = 0
         let earliest = calendar.startOfDay(for: createdAt)
 
         while checkDate >= earliest {
             if isScheduledOn(checkDate) {
-                if completedDays.contains(checkDate) {
+                if completed.contains(checkDate) {
                     streak += 1
+                    consecutiveMisses = 0
                 } else {
-                    break
+                    consecutiveMisses += 1
+                    if consecutiveMisses > graceDays {
+                        break
+                    }
                 }
             }
             checkDate = checkDate.adding(days: -1)
@@ -90,23 +102,29 @@ final class Habit {
     }
 
     var bestStreak: Int {
-        let calendar = Calendar.current
-        let completedDays = Set(entries.map { calendar.startOfDay(for: $0.date) })
-        guard !completedDays.isEmpty else { return 0 }
+        let completed = completedDaySet
+        guard !completed.isEmpty else { return 0 }
 
+        let calendar = Calendar.current
         let earliest = calendar.startOfDay(for: createdAt)
         var checkDate = earliest
         let today = calendar.startOfDay(for: Date())
         var current = 0
         var best = 0
+        var consecutiveMisses = 0
 
         while checkDate <= today {
             if isScheduledOn(checkDate) {
-                if completedDays.contains(checkDate) {
+                if completed.contains(checkDate) {
                     current += 1
+                    consecutiveMisses = 0
                     best = max(best, current)
                 } else {
-                    current = 0
+                    consecutiveMisses += 1
+                    if consecutiveMisses > graceDays {
+                        current = 0
+                        consecutiveMisses = 0
+                    }
                 }
             }
             checkDate = checkDate.adding(days: 1)
@@ -141,5 +159,47 @@ final class Habit {
         guard let end = endDate else { return nil }
         let remaining = Date().daysBetween(end)
         return max(remaining, 0)
+    }
+
+    // MARK: - Weekly stats
+
+    func completionCount(in range: ClosedRange<Date>) -> (completed: Int, scheduled: Int) {
+        let calendar = Calendar.current
+        let completed = completedDaySet
+        var date = calendar.startOfDay(for: range.lowerBound)
+        let end = calendar.startOfDay(for: range.upperBound)
+        var done = 0
+        var total = 0
+
+        while date <= end {
+            if isScheduledOn(date) {
+                total += 1
+                if completed.contains(date) { done += 1 }
+            }
+            date = date.adding(days: 1)
+        }
+        return (done, total)
+    }
+
+    // MARK: - Milestones
+
+    static let milestoneThresholds: [(days: Int, name: String, icon: String, colorHex: String)] = [
+        (7, "First Week", "star.fill", "FFD60A"),
+        (21, "Habit Formed", "brain", "AF52DE"),
+        (30, "One Month", "moon.fill", "007AFF"),
+        (60, "Two Months", "flame.fill", "FF9500"),
+        (90, "Quarter Year", "trophy.fill", "FFD60A"),
+        (180, "Half Year", "crown.fill", "5856D6"),
+        (365, "One Year", "sparkles", "FF2D55"),
+    ]
+
+    var achievedMilestones: [(days: Int, name: String, icon: String, colorHex: String)] {
+        let best = bestStreak
+        return Self.milestoneThresholds.filter { best >= $0.days }
+    }
+
+    var nextMilestone: (days: Int, name: String, icon: String, colorHex: String)? {
+        let best = bestStreak
+        return Self.milestoneThresholds.first { best < $0.days }
     }
 }

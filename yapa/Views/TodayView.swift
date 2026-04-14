@@ -35,9 +35,10 @@ struct TodayView: View {
                 ScrollView {
                     VStack(spacing: 24) {
                         headerSection
-                        if !todayHabits.isEmpty {
-                            progressSection
-                            habitsSection
+                    if !todayHabits.isEmpty {
+                        progressSection
+                        habitsSection
+                        WeeklyInsightCard(habits: allHabits)
                         } else if allHabits.isEmpty {
                             EmptyStateView(
                                 icon: "leaf.fill",

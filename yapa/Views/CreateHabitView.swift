@@ -13,6 +13,7 @@ struct CreateHabitView: View {
     @State private var isDaily: Bool
     @State private var selectedWeekdays: Set<Int>
     @State private var targetDays: Int
+    @State private var graceDays: Int
     @State private var reminderEnabled: Bool
     @State private var reminderTime: Date
     @State private var showEmojiPicker = false
@@ -28,6 +29,7 @@ struct CreateHabitView: View {
             _isDaily = State(initialValue: h.scheduledWeekdays.isEmpty)
             _selectedWeekdays = State(initialValue: Set(h.scheduledWeekdays))
             _targetDays = State(initialValue: h.targetDays)
+            _graceDays = State(initialValue: h.graceDays)
             _reminderEnabled = State(initialValue: !h.reminderMinutes.isEmpty)
             if let first = h.reminderMinutes.first {
                 _reminderTime = State(initialValue: Calendar.current.date(
@@ -45,6 +47,7 @@ struct CreateHabitView: View {
             _isDaily = State(initialValue: true)
             _selectedWeekdays = State(initialValue: [])
             _targetDays = State(initialValue: 0)
+            _graceDays = State(initialValue: 0)
             _reminderEnabled = State(initialValue: false)
             _reminderTime = State(initialValue: Calendar.current.date(
                 from: DateComponents(hour: 9, minute: 0)
@@ -87,6 +90,7 @@ struct CreateHabitView: View {
                     colorSection
                     frequencySection
                     durationSection
+                    graceDaysSection
                     reminderSection
                 }
                 .padding(20)
@@ -255,6 +259,36 @@ struct CreateHabitView: View {
         }
     }
 
+    private var graceDaysSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionLabel("STREAK PROTECTION")
+
+            VStack(spacing: 8) {
+                HStack {
+                    Label("Grace days", systemImage: "shield.fill")
+                        .font(.system(.body, design: .rounded))
+
+                    Spacer()
+
+                    Picker("Grace days", selection: $graceDays) {
+                        Text("None").tag(0)
+                        Text("1 day").tag(1)
+                        Text("2 days").tag(2)
+                    }
+                    .pickerStyle(.menu)
+                    .tint(Color(hex: selectedColor))
+                }
+
+                Text("Miss up to \(graceDays == 0 ? "0 days" : "\(graceDays) day\(graceDays > 1 ? "s" : "")") in a row without losing your streak.")
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(14)
+            .background(.background)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+    }
+
     private var reminderSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionLabel("REMINDER")
@@ -309,6 +343,7 @@ struct CreateHabitView: View {
             habit.colorHex = selectedColor
             habit.scheduledWeekdays = weekdays
             habit.targetDays = targetDays
+            habit.graceDays = graceDays
             habit.reminderMinutes = reminders
         } else {
             let descriptor = FetchDescriptor<Habit>(sortBy: [SortDescriptor(\Habit.sortOrder, order: .reverse)])
@@ -320,7 +355,8 @@ struct CreateHabitView: View {
                 colorHex: selectedColor,
                 scheduledWeekdays: weekdays,
                 targetDays: targetDays,
-                reminderMinutes: reminders
+                reminderMinutes: reminders,
+                graceDays: graceDays
             )
             habit.sortOrder = maxOrder + 1
             modelContext.insert(habit)
