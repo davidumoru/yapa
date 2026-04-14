@@ -4,10 +4,12 @@ import SwiftData
 struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<Habit> { !$0.isArchived },
-           sort: \Habit.createdAt)
+           sort: [SortDescriptor(\Habit.sortOrder), SortDescriptor(\Habit.createdAt)])
     private var allHabits: [Habit]
 
     @State private var showCreateHabit = false
+    @State private var showConfetti = false
+    @State private var previousCompletedCount = -1
 
     private var todayHabits: [Habit] {
         allHabits.filter { $0.isScheduledToday }
@@ -29,40 +31,44 @@ struct TodayView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    headerSection
-                    if !todayHabits.isEmpty {
-                        progressSection
-                        habitsSection
-                    } else if allHabits.isEmpty {
-                        EmptyStateView(
-                            icon: "leaf.fill",
-                            title: "Plant your first habit",
-                            subtitle: "Start building positive routines by creating your first habit.",
-                            buttonTitle: "Create Habit",
-                            action: { showCreateHabit = true }
-                        )
-                        .frame(minHeight: 300)
-                    } else {
-                        VStack(spacing: 12) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 44))
-                                .foregroundStyle(.green)
-                            Text("Nothing scheduled today")
-                                .font(.system(.headline, design: .rounded))
-                            Text("Enjoy your rest day!")
-                                .font(.system(.subheadline, design: .rounded))
-                                .foregroundStyle(.secondary)
+            ZStack {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        headerSection
+                        if !todayHabits.isEmpty {
+                            progressSection
+                            habitsSection
+                        } else if allHabits.isEmpty {
+                            EmptyStateView(
+                                icon: "leaf.fill",
+                                title: "Plant your first habit",
+                                subtitle: "Start building positive routines by creating your first habit.",
+                                buttonTitle: "Create Habit",
+                                action: { showCreateHabit = true }
+                            )
+                            .frame(minHeight: 300)
+                        } else {
+                            VStack(spacing: 12) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 44))
+                                    .foregroundStyle(.green)
+                                Text("Nothing scheduled today")
+                                    .font(.system(.headline, design: .rounded))
+                                Text("Enjoy your rest day!")
+                                    .font(.system(.subheadline, design: .rounded))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 60)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 60)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 32)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 32)
+                .background(Color(.systemGroupedBackground))
+
+                ConfettiOverlay(isActive: $showConfetti)
             }
-            .background(Color(.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -78,6 +84,13 @@ struct TodayView: View {
             }
             .sheet(isPresented: $showCreateHabit) {
                 CreateHabitView()
+            }
+            .onChange(of: completedCount) { oldValue, newValue in
+                let total = todayHabits.count
+                if total > 0 && newValue == total && oldValue < total {
+                    showConfetti = true
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                }
             }
         }
     }

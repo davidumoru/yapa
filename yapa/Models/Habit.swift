@@ -15,6 +15,7 @@ final class Habit {
     var reminderMinutes: [Int] = []
     var createdAt: Date = Date()
     var isArchived: Bool = false
+    var sortOrder: Int = 0
 
     @Relationship(deleteRule: .cascade, inverse: \HabitEntry.habit)
     var entries: [HabitEntry] = []

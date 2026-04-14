@@ -41,9 +41,15 @@ struct HabitCard: View {
             Spacer()
 
             Button(action: {
+                let wasCompleted = habit.isCompletedToday
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
                     animateCheck = true
                     onToggle()
+                }
+                if wasCompleted {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } else {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                     animateCheck = false

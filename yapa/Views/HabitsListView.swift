@@ -3,9 +3,11 @@ import SwiftData
 
 struct HabitsListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Habit.createdAt) private var habits: [Habit]
+    @Query(sort: [SortDescriptor(\Habit.sortOrder), SortDescriptor(\Habit.createdAt)])
+    private var habits: [Habit]
 
     @State private var showCreateHabit = false
+    @State private var showReorder = false
 
     private var activeHabits: [Habit] {
         habits.filter { !$0.isArchived }
@@ -42,6 +44,14 @@ struct HabitsListView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Habits")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if activeHabits.count > 1 {
+                        Button { showReorder = true } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showCreateHabit = true } label: {
                         Image(systemName: "plus")
@@ -55,6 +65,9 @@ struct HabitsListView: View {
             }
             .sheet(isPresented: $showCreateHabit) {
                 CreateHabitView()
+            }
+            .sheet(isPresented: $showReorder) {
+                ReorderHabitsView()
             }
         }
     }
@@ -109,7 +122,7 @@ struct HabitsListView: View {
 
             let rate = Int(habit.completionRate * 100)
             HStack(spacing: 6) {
-                ProgressView(value: habit.completionRate)
+                ProgressView(value: min(habit.completionRate, 1.0))
                     .tint(accentColor)
 
                 Text("\(rate)%")
@@ -122,5 +135,70 @@ struct HabitsListView: View {
         .background(.background)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+    }
+}
+
+// MARK: - Reorder Sheet
+
+struct ReorderHabitsView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Query(filter: #Predicate<Habit> { !$0.isArchived },
+           sort: [SortDescriptor(\Habit.sortOrder), SortDescriptor(\Habit.createdAt)])
+    private var habits: [Habit]
+
+    @State private var orderedHabits: [Habit] = []
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(orderedHabits) { habit in
+                    HStack(spacing: 14) {
+                        Text(habit.emoji)
+                            .font(.system(size: 24))
+                            .frame(width: 36, height: 36)
+                            .background(Color(hex: habit.colorHex).opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                        Text(habit.name)
+                            .font(.system(.body, design: .rounded, weight: .medium))
+
+                        Spacer()
+
+                        Image(systemName: "line.3.horizontal")
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .onMove(perform: moveHabit)
+            }
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle("Reorder Habits")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        saveOrder()
+                        dismiss()
+                    }
+                    .font(.system(.body, design: .rounded, weight: .semibold))
+                }
+            }
+            .onAppear {
+                orderedHabits = habits
+            }
+        }
+    }
+
+    private func moveHabit(from source: IndexSet, to destination: Int) {
+        orderedHabits.move(fromOffsets: source, toOffset: destination)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    private func saveOrder() {
+        for (index, habit) in orderedHabits.enumerated() {
+            habit.sortOrder = index
+        }
+        try? modelContext.save()
     }
 }

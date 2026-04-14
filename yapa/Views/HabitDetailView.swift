@@ -3,6 +3,7 @@ import SwiftData
 
 struct HabitDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Bindable var habit: Habit
 
     @State private var showDeleteConfirmation = false
@@ -32,6 +33,17 @@ struct HabitDetailView: View {
                         )
                     }
 
+                    Button { showEditSheet = true } label: {
+                        Label("Edit Habit", systemImage: "pencil")
+                    }
+
+                    Button { toggleArchive() } label: {
+                        Label(
+                            habit.isArchived ? "Unarchive" : "Archive",
+                            systemImage: habit.isArchived ? "tray.and.arrow.up" : "archivebox"
+                        )
+                    }
+
                     Divider()
 
                     Button(role: .destructive) {
@@ -44,6 +56,9 @@ struct HabitDetailView: View {
                         .font(.system(size: 16, weight: .semibold))
                 }
             }
+        }
+        .sheet(isPresented: $showEditSheet) {
+            CreateHabitView(habitToEdit: habit)
         }
         .alert("Delete Habit?", isPresented: $showDeleteConfirmation) {
             Button("Delete", role: .destructive) { deleteHabit() }
@@ -66,10 +81,21 @@ struct HabitDetailView: View {
             Text(habit.name)
                 .font(.system(.title2, design: .rounded, weight: .bold))
 
-            if let daysRemaining = habit.daysRemaining {
-                Text("\(daysRemaining) days remaining")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundStyle(.secondary)
+            HStack(spacing: 16) {
+                if habit.isArchived {
+                    Text("Archived")
+                        .font(.system(.caption, design: .rounded, weight: .medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Color(.systemGray4))
+                        .foregroundStyle(.white)
+                        .clipShape(Capsule())
+                }
+                if let daysRemaining = habit.daysRemaining {
+                    Text("\(daysRemaining) days remaining")
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Button {
@@ -196,7 +222,8 @@ struct HabitDetailView: View {
     // MARK: - Actions
 
     private func toggleTodayCompletion() {
-        if habit.isCompletedToday {
+        let wasCompleted = habit.isCompletedToday
+        if wasCompleted {
             if let entry = habit.entries.first(where: { $0.date.startOfDay == Date().startOfDay }) {
                 modelContext.delete(entry)
             }
@@ -205,11 +232,36 @@ struct HabitDetailView: View {
             modelContext.insert(entry)
         }
         try? modelContext.save()
+
+        if wasCompleted {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } else {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+    }
+
+    private func toggleArchive() {
+        habit.isArchived.toggle()
+        try? modelContext.save()
+
+        if habit.isArchived {
+            NotificationManager.shared.removeReminders(for: habit)
+        } else if !habit.reminderMinutes.isEmpty {
+            Task {
+                await NotificationManager.shared.requestAuthorization()
+                NotificationManager.shared.scheduleReminders(for: habit)
+            }
+        }
+
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        dismiss()
     }
 
     private func deleteHabit() {
         NotificationManager.shared.removeReminders(for: habit)
         modelContext.delete(habit)
         try? modelContext.save()
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        dismiss()
     }
 }

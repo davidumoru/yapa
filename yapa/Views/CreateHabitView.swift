@@ -5,18 +5,52 @@ struct CreateHabitView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    @State private var name = ""
-    @State private var emoji = "🎯"
-    @State private var selectedColor = "34C759"
-    @State private var isDaily = true
-    @State private var selectedWeekdays: Set<Int> = []
-    @State private var targetDays = 0
-    @State private var reminderEnabled = false
-    @State private var reminderTime = Calendar.current.date(
-        from: DateComponents(hour: 9, minute: 0)
-    ) ?? Date()
+    let habitToEdit: Habit?
 
+    @State private var name: String
+    @State private var emoji: String
+    @State private var selectedColor: String
+    @State private var isDaily: Bool
+    @State private var selectedWeekdays: Set<Int>
+    @State private var targetDays: Int
+    @State private var reminderEnabled: Bool
+    @State private var reminderTime: Date
     @State private var showEmojiPicker = false
+
+    private var isEditing: Bool { habitToEdit != nil }
+
+    init(habitToEdit: Habit? = nil) {
+        self.habitToEdit = habitToEdit
+        if let h = habitToEdit {
+            _name = State(initialValue: h.name)
+            _emoji = State(initialValue: h.emoji)
+            _selectedColor = State(initialValue: h.colorHex)
+            _isDaily = State(initialValue: h.scheduledWeekdays.isEmpty)
+            _selectedWeekdays = State(initialValue: Set(h.scheduledWeekdays))
+            _targetDays = State(initialValue: h.targetDays)
+            _reminderEnabled = State(initialValue: !h.reminderMinutes.isEmpty)
+            if let first = h.reminderMinutes.first {
+                _reminderTime = State(initialValue: Calendar.current.date(
+                    from: DateComponents(hour: first / 60, minute: first % 60)
+                ) ?? Date())
+            } else {
+                _reminderTime = State(initialValue: Calendar.current.date(
+                    from: DateComponents(hour: 9, minute: 0)
+                ) ?? Date())
+            }
+        } else {
+            _name = State(initialValue: "")
+            _emoji = State(initialValue: "🎯")
+            _selectedColor = State(initialValue: "34C759")
+            _isDaily = State(initialValue: true)
+            _selectedWeekdays = State(initialValue: [])
+            _targetDays = State(initialValue: 0)
+            _reminderEnabled = State(initialValue: false)
+            _reminderTime = State(initialValue: Calendar.current.date(
+                from: DateComponents(hour: 9, minute: 0)
+            ) ?? Date())
+        }
+    }
 
     private let colorOptions = [
         "34C759", "30D158", "007AFF", "5856D6",
@@ -58,14 +92,14 @@ struct CreateHabitView: View {
                 .padding(20)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("New Habit")
+            .navigationTitle(isEditing ? "Edit Habit" : "New Habit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
+                    Button(isEditing ? "Update" : "Save") { save() }
                         .font(.system(.body, design: .rounded, weight: .semibold))
                         .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -267,25 +301,48 @@ struct CreateHabitView: View {
             reminders.append((comps.hour ?? 9) * 60 + (comps.minute ?? 0))
         }
 
-        let habit = Habit(
-            name: trimmed,
-            emoji: emoji,
-            colorHex: selectedColor,
-            scheduledWeekdays: isDaily ? [] : Array(selectedWeekdays).sorted(),
-            targetDays: targetDays,
-            reminderMinutes: reminders
-        )
+        let weekdays = isDaily ? [Int]() : Array(selectedWeekdays).sorted()
 
-        modelContext.insert(habit)
+        if let habit = habitToEdit {
+            habit.name = trimmed
+            habit.emoji = emoji
+            habit.colorHex = selectedColor
+            habit.scheduledWeekdays = weekdays
+            habit.targetDays = targetDays
+            habit.reminderMinutes = reminders
+        } else {
+            let descriptor = FetchDescriptor<Habit>(sortBy: [SortDescriptor(\Habit.sortOrder, order: .reverse)])
+            let maxOrder = (try? modelContext.fetch(descriptor).first?.sortOrder) ?? -1
+
+            let habit = Habit(
+                name: trimmed,
+                emoji: emoji,
+                colorHex: selectedColor,
+                scheduledWeekdays: weekdays,
+                targetDays: targetDays,
+                reminderMinutes: reminders
+            )
+            habit.sortOrder = maxOrder + 1
+            modelContext.insert(habit)
+        }
+
         try? modelContext.save()
 
-        if reminderEnabled {
-            Task {
-                await NotificationManager.shared.requestAuthorization()
-                NotificationManager.shared.scheduleReminders(for: habit)
+        if let habit = habitToEdit ?? (try? modelContext.fetch(FetchDescriptor<Habit>(
+            predicate: #Predicate { $0.name == trimmed },
+            sortBy: [SortDescriptor(\Habit.createdAt, order: .reverse)]
+        )).first) {
+            if reminderEnabled {
+                Task {
+                    await NotificationManager.shared.requestAuthorization()
+                    NotificationManager.shared.scheduleReminders(for: habit)
+                }
+            } else {
+                NotificationManager.shared.removeReminders(for: habit)
             }
         }
 
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         dismiss()
     }
 }
