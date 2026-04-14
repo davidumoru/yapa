@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct yapaApp: App {
@@ -13,5 +14,6 @@ struct yapaApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [Habit.self, HabitEntry.self])
     }
 }

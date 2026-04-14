@@ -6,19 +6,30 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world! Arghhhhh")
+        TabView(selection: $selectedTab) {
+            TodayView()
+                .tabItem {
+                    Label("Today", systemImage: "sun.max.fill")
+                }
+                .tag(0)
+
+            HabitsListView()
+                .tabItem {
+                    Label("Habits", systemImage: "square.grid.2x2.fill")
+                }
+                .tag(1)
         }
-        .padding()
+        .tint(Color(hex: "34C759"))
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: [Habit.self, HabitEntry.self], inMemory: true)
 }
