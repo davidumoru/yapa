@@ -2,17 +2,107 @@ import WidgetKit
 import SwiftUI
 import SwiftData
 
-// MARK: - Shared container
+// MARK: - SwiftData Models (duplicated for widget target isolation)
 
-let sharedModelContainer: ModelContainer = {
-    let schema = Schema([Habit.self, HabitEntry.self])
-    let config = ModelConfiguration("default")
-    return try! ModelContainer(for: schema, configurations: [config])
-}()
+@Model
+final class Habit {
+    var id: UUID = UUID()
+    var name: String = ""
+    var emoji: String = "🎯"
+    var colorHex: String = "34C759"
+    var scheduledWeekdays: [Int] = []
+    var targetDays: Int = 0
+    var reminderMinutes: [Int] = []
+    var createdAt: Date = Date()
+    var isArchived: Bool = false
+    var sortOrder: Int = 0
+    var graceDays: Int = 0
+
+    @Relationship(deleteRule: .cascade, inverse: \HabitEntry.habit)
+    var entries: [HabitEntry] = []
+
+    init() {}
+
+    var isScheduledToday: Bool {
+        if scheduledWeekdays.isEmpty { return true }
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        return scheduledWeekdays.contains(weekday)
+    }
+
+    var isCompletedToday: Bool {
+        let today = Calendar.current.startOfDay(for: Date())
+        return entries.contains { Calendar.current.startOfDay(for: $0.date) == today }
+    }
+
+    var currentStreak: Int {
+        let calendar = Calendar.current
+        let completedDays = Set(entries.map { calendar.startOfDay(for: $0.date) })
+        guard !completedDays.isEmpty else { return 0 }
+
+        var checkDate = calendar.startOfDay(for: Date())
+        if !completedDays.contains(checkDate) {
+            checkDate = calendar.date(byAdding: .day, value: -1, to: checkDate)!
+        }
+
+        var streak = 0
+        var consecutiveMisses = 0
+        let earliest = calendar.startOfDay(for: createdAt)
+
+        while checkDate >= earliest {
+            let weekday = calendar.component(.weekday, from: checkDate)
+            let isScheduled = scheduledWeekdays.isEmpty || scheduledWeekdays.contains(weekday)
+
+            if isScheduled {
+                if completedDays.contains(checkDate) {
+                    streak += 1
+                    consecutiveMisses = 0
+                } else {
+                    consecutiveMisses += 1
+                    if consecutiveMisses > graceDays { break }
+                }
+            }
+            checkDate = calendar.date(byAdding: .day, value: -1, to: checkDate)!
+        }
+        return streak
+    }
+}
+
+@Model
+final class HabitEntry {
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var completedAt: Date = Date()
+    var note: String = ""
+    var habit: Habit?
+
+    init() {}
+}
+
+// MARK: - Color Extension
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let r, g, b: UInt64
+        switch hex.count {
+        case 6: (r, g, b) = (int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        default: (r, g, b) = (0, 0, 0)
+        }
+        self.init(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
+    }
+}
 
 // MARK: - Timeline Provider
 
 struct HabitWidgetProvider: TimelineProvider {
+    let modelContainer: ModelContainer = {
+        let schema = Schema([Habit.self, HabitEntry.self])
+        let config = ModelConfiguration("default")
+        return try! ModelContainer(for: schema, configurations: [config])
+    }()
+
     func placeholder(in context: Context) -> HabitWidgetEntry {
         HabitWidgetEntry(
             date: Date(),
@@ -27,18 +117,22 @@ struct HabitWidgetProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (HabitWidgetEntry) -> Void) {
-        completion(buildEntry())
+        Task { @MainActor in
+            completion(buildEntry())
+        }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<HabitWidgetEntry>) -> Void) {
-        let entry = buildEntry()
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
-        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+        Task { @MainActor in
+            let entry = buildEntry()
+            let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
+            completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+        }
     }
 
     @MainActor
     private func buildEntry() -> HabitWidgetEntry {
-        let context = sharedModelContainer.mainContext
+        let context = modelContainer.mainContext
         let descriptor = FetchDescriptor<Habit>(
             predicate: #Predicate { !$0.isArchived },
             sortBy: [SortDescriptor(\Habit.sortOrder), SortDescriptor(\Habit.createdAt)]
