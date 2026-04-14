@@ -6,7 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AB22615E2F8ECD9900646A54 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB22615D2F8ECD9900646A54 /* WidgetKit.framework */; };
+		AB2261602F8ECD9900646A54 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB22615F2F8ECD9900646A54 /* SwiftUI.framework */; };
+		AB2261712F8ECD9A00646A54 /* yapaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AB22615B2F8ECD9900646A54 /* yapaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		AB22616F2F8ECD9A00646A54 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AB54A7A92F8D9B310045CEA0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AB22615A2F8ECD9900646A54;
+			remoteInfo = yapaWidgetExtension;
+		};
 		AB54A7BF2F8D9B320045CEA0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AB54A7A92F8D9B310045CEA0 /* Project object */;
@@ -23,13 +36,48 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		AB2261762F8ECD9A00646A54 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AB2261712F8ECD9A00646A54 /* yapaWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		AB22615B2F8ECD9900646A54 /* yapaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = yapaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB22615D2F8ECD9900646A54 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		AB22615F2F8ECD9900646A54 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		AB54A7B12F8D9B310045CEA0 /* yapa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yapa.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB54A7BE2F8D9B320045CEA0 /* yapaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yapaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB54A7C82F8D9B320045CEA0 /* yapaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yapaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AB2261722F8ECD9A00646A54 /* Exceptions for "yapaWidget" folder in "yapaWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AB22615A2F8ECD9900646A54 /* yapaWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		AB2261612F8ECD9900646A54 /* yapaWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AB2261722F8ECD9A00646A54 /* Exceptions for "yapaWidget" folder in "yapaWidgetExtension" target */,
+			);
+			path = yapaWidget;
+			sourceTree = "<group>";
+		};
 		AB54A7B32F8D9B310045CEA0 /* yapa */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = yapa;
@@ -48,6 +96,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AB2261582F8ECD9900646A54 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB2261602F8ECD9900646A54 /* SwiftUI.framework in Frameworks */,
+				AB22615E2F8ECD9900646A54 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AB54A7AE2F8D9B310045CEA0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -72,12 +129,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AB22615C2F8ECD9900646A54 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AB22615D2F8ECD9900646A54 /* WidgetKit.framework */,
+				AB22615F2F8ECD9900646A54 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AB54A7A82F8D9B310045CEA0 = {
 			isa = PBXGroup;
 			children = (
 				AB54A7B32F8D9B310045CEA0 /* yapa */,
 				AB54A7C12F8D9B320045CEA0 /* yapaTests */,
 				AB54A7CB2F8D9B320045CEA0 /* yapaUITests */,
+				AB2261612F8ECD9900646A54 /* yapaWidget */,
+				AB22615C2F8ECD9900646A54 /* Frameworks */,
 				AB54A7B22F8D9B310045CEA0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,6 +156,7 @@
 				AB54A7B12F8D9B310045CEA0 /* yapa.app */,
 				AB54A7BE2F8D9B320045CEA0 /* yapaTests.xctest */,
 				AB54A7C82F8D9B320045CEA0 /* yapaUITests.xctest */,
+				AB22615B2F8ECD9900646A54 /* yapaWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +164,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AB22615A2F8ECD9900646A54 /* yapaWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AB2261732F8ECD9A00646A54 /* Build configuration list for PBXNativeTarget "yapaWidgetExtension" */;
+			buildPhases = (
+				AB2261572F8ECD9900646A54 /* Sources */,
+				AB2261582F8ECD9900646A54 /* Frameworks */,
+				AB2261592F8ECD9900646A54 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AB2261612F8ECD9900646A54 /* yapaWidget */,
+			);
+			name = yapaWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = yapaWidgetExtension;
+			productReference = AB22615B2F8ECD9900646A54 /* yapaWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		AB54A7B02F8D9B310045CEA0 /* yapa */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AB54A7D22F8D9B320045CEA0 /* Build configuration list for PBXNativeTarget "yapa" */;
@@ -102,10 +193,12 @@
 				AB54A7AD2F8D9B310045CEA0 /* Sources */,
 				AB54A7AE2F8D9B310045CEA0 /* Frameworks */,
 				AB54A7AF2F8D9B310045CEA0 /* Resources */,
+				AB2261762F8ECD9A00646A54 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AB2261702F8ECD9A00646A54 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AB54A7B32F8D9B310045CEA0 /* yapa */,
@@ -173,6 +266,9 @@
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					AB22615A2F8ECD9900646A54 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					AB54A7B02F8D9B310045CEA0 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -203,11 +299,19 @@
 				AB54A7B02F8D9B310045CEA0 /* yapa */,
 				AB54A7BD2F8D9B320045CEA0 /* yapaTests */,
 				AB54A7C72F8D9B320045CEA0 /* yapaUITests */,
+				AB22615A2F8ECD9900646A54 /* yapaWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		AB2261592F8ECD9900646A54 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AB54A7AF2F8D9B310045CEA0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -232,6 +336,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		AB2261572F8ECD9900646A54 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AB54A7AD2F8D9B310045CEA0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -256,6 +367,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AB2261702F8ECD9A00646A54 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AB22615A2F8ECD9900646A54 /* yapaWidgetExtension */;
+			targetProxy = AB22616F2F8ECD9A00646A54 /* PBXContainerItemProxy */;
+		};
 		AB54A7C02F8D9B320045CEA0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AB54A7B02F8D9B310045CEA0 /* yapa */;
@@ -269,6 +385,60 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		AB2261742F8ECD9A00646A54 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5A8F5F6S9B;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = yapaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = yapaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.davidumoru.yapa.yapaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AB2261752F8ECD9A00646A54 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5A8F5F6S9B;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = yapaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = yapaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.davidumoru.yapa.yapaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		AB54A7D02F8D9B320045CEA0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -521,6 +691,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		AB2261732F8ECD9A00646A54 /* Build configuration list for PBXNativeTarget "yapaWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB2261742F8ECD9A00646A54 /* Debug */,
+				AB2261752F8ECD9A00646A54 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AB54A7AC2F8D9B310045CEA0 /* Build configuration list for PBXProject "yapa" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
