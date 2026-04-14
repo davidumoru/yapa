@@ -5,5 +5,6 @@ import SwiftUI
 struct yapaWidgetBundle: WidgetBundle {
     var body: some Widget {
         yapaWidget()
+        SingleHabitWidget()
     }
 }
